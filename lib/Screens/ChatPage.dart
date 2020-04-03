@@ -1,13 +1,21 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:video_chatting_app/constants/string.dart';
+import 'package:video_chatting_app/enum/view_state.dart';
 import 'package:video_chatting_app/models/message.dart';
 import 'package:video_chatting_app/models/user.dart';
+import 'package:video_chatting_app/provider/image_upload_provider.dart';
 import 'package:video_chatting_app/resources/firebase_repository.dart';
+import 'package:video_chatting_app/utils/utilities.dart';
 import 'package:video_chatting_app/widgets/appBar.dart';
+import 'package:video_chatting_app/widgets/cached_image.dart';
 import 'package:video_chatting_app/widgets/custom_tile.dart';
 
 
@@ -21,6 +29,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
 
+  ImageUploadProvider _imageUploadProvider;
 
   FocusNode textFieldFocus = FocusNode();
   TextEditingController textEditingController = TextEditingController();
@@ -51,6 +60,7 @@ FirebaseRepository _repository = FirebaseRepository();
 
   @override
   Widget build(BuildContext context) {
+   _imageUploadProvider = Provider.of<ImageUploadProvider>(context);
     return Scaffold(
       appBar: customAppBar(context),
       body: Column(
@@ -59,6 +69,12 @@ FirebaseRepository _repository = FirebaseRepository();
 
             child: messageList(),
           ),
+          _imageUploadProvider.getViewState == ViewState.LOADING
+          ? Container(
+            alignment: Alignment.centerRight,
+            margin: EdgeInsets.only(right: 15),
+            child: CircularProgressIndicator(),
+          ):Container(),
           chatControls(),
           emojiOn ? Container(child: emojiContainer(),)
               : Container(),
@@ -192,13 +208,15 @@ Widget senderLayout(Message  message ){
 
 
   getMessage(Message message){
-   return Text(
+
+   return message.type != Is_Image ?
+     Text(
     message!= null ? message.message : '',
 style: TextStyle(
   color: Colors.white,
   fontSize: 15.0
 ),
-   );
+   ) : message.photoUrl !=null? CachedImage(url: message.photoUrl,) : Text('Sending');
   }
   Widget receiverLayout(Message message){
     Radius messageRadius  = Radius.circular(10);
@@ -247,7 +265,16 @@ style: TextStyle(
     );
   }
 
+  pickImage(@required ImageSource source) async{
+    File selectedImage = await Utils.pickImage(source: source);
+    _repository.uploadImage(
+        image :selectedImage,
+        receiverId :widget.receiver.uid,
+        senderId : _currentUserId,
+        imageUploadProvider:_imageUploadProvider
+    );
 
+  }
   Widget chatControls() {
 
     setWritingTo(bool val){
@@ -291,6 +318,7 @@ style: TextStyle(
                     title: 'Media',
                     subtitle: 'Photos and videos',
                     icon: Icons.image,
+                    onTap: () => pickImage(ImageSource.gallery),
                   ),
                   ModalTile(
                     title: 'File',
@@ -399,7 +427,9 @@ onChanged: (val) {
             padding: EdgeInsets.symmetric(horizontal: 10),
             child: Icon(Icons.record_voice_over),
           ),
-         onTap ? Container() :  Icon(Icons.camera_alt),
+         onTap ? Container() :  GestureDetector(
+           onTap: () => pickImage(ImageSource.camera),
+             child: Icon(Icons.camera_alt)),
 
           onTap ? Container(margin: EdgeInsets.only(left: 10),
           decoration: BoxDecoration(
@@ -425,12 +455,14 @@ class ModalTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  final Function onTap;
 
 
   const ModalTile({
     @required this.title,
     @required this.subtitle,
-    @required this.icon
+    @required this.icon,
+    this.onTap
 });
 
 
@@ -440,6 +472,7 @@ class ModalTile extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: CustomTile(
         mini: false,
+        onTap: onTap,
         leading: Container(
           margin: EdgeInsets.only(right: 30),
           decoration: BoxDecoration(
