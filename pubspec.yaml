@@ -33,7 +33,8 @@ dependencies:
   cached_network_image: ^2.0.0
   emoji_picker: ^0.1.0
   image_picker:  ^0.6.4
-  permission_handler: ^5.0.0+hotfix.3
+  permission_handler: 3.0.0
+  agora_rtc_engine: ^1.0.8
 dev_dependencies:
   flutter_test:
     sdk: flutter

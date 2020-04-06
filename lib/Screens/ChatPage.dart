@@ -13,6 +13,8 @@ import 'package:video_chatting_app/models/message.dart';
 import 'package:video_chatting_app/models/user.dart';
 import 'package:video_chatting_app/provider/image_upload_provider.dart';
 import 'package:video_chatting_app/resources/firebase_repository.dart';
+import 'package:video_chatting_app/utils/call_utilities.dart';
+import 'package:video_chatting_app/utils/permissions.dart';
 import 'package:video_chatting_app/utils/utilities.dart';
 import 'package:video_chatting_app/widgets/appBar.dart';
 import 'package:video_chatting_app/widgets/cached_image.dart';
@@ -216,7 +218,9 @@ style: TextStyle(
   color: Colors.white,
   fontSize: 15.0
 ),
-   ) : message.photoUrl !=null? CachedImage(url: message.photoUrl,) : Text('Sending');
+   ) : message.photoUrl !=null? CachedImage( message.photoUrl,
+   height: 250.0,
+   width: 250.0,) : Text('Sending');
   }
   Widget receiverLayout(Message message){
     Radius messageRadius  = Radius.circular(10);
@@ -255,7 +259,14 @@ style: TextStyle(
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.video_call,),
-        onPressed: (){},
+        onPressed: () async => await Permissions
+            .cameraAndMicrophonePermissionsGranted()
+            ? CallUtils.dial(
+          from: sender,
+          to: widget.receiver,
+          context: context
+
+        ) : {} ,
         ),
         IconButton(
           icon: Icon(Icons.call),

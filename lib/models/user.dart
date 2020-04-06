@@ -20,6 +20,7 @@ class User{
     data['status'] = user.status;
     data['state'] = user.state;
     data['profile_photo'] = user.profilePhoto;
+    return data;
 
   }
 

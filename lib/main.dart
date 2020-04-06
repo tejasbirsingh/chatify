@@ -5,6 +5,7 @@ import 'package:video_chatting_app/Screens/Home.dart';
 import 'package:video_chatting_app/Screens/Login.dart';
 import 'package:video_chatting_app/Screens/SearchPage.dart';
 import 'package:video_chatting_app/provider/image_upload_provider.dart';
+import 'package:video_chatting_app/provider/user_provider.dart';
 import 'package:video_chatting_app/resources/firebase_repository.dart';
 
 void main() => runApp(MyApp());
@@ -21,8 +22,12 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
 
 //    _repository.signOut();
-    return ChangeNotifierProvider<ImageUploadProvider>(
-      create: (context) => ImageUploadProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider( create: (_) => ImageUploadProvider(),),
+        ChangeNotifierProvider( create: (_) => UserProvider(),)
+      ],
+
       child: MaterialApp(
         theme: ThemeData.dark(),
         title: 'Chatify',

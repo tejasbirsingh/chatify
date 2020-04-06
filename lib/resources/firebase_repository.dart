@@ -29,6 +29,9 @@ class FirebaseRepository {
   Future<void> addMessageToDb(Message message , User sender , User receiver) =>
       _firebaseMethods.addMessageToDb(message,sender,receiver);
 
+Future<User> getUserDetails() => _firebaseMethods.getUserDetails();
+
+
   void uploadImage({
   @required File image,
     @required String receiverId,

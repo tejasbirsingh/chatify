@@ -11,11 +11,19 @@ import 'package:video_chatting_app/models/user.dart';
 import 'package:video_chatting_app/provider/image_upload_provider.dart';
 
 class FirebaseMethods {
+
   User user = User();
   StorageReference _storageReference;
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   GoogleSignIn _googleSignIn = GoogleSignIn();
   static final Firestore firestore = Firestore.instance;
+
+  static final Firestore _firestore = Firestore.instance;
+
+
+  static final CollectionReference _userCollection =
+            _firestore.collection(user_collection);
 
   Future<FirebaseUser> getCurrentUser() async {
     FirebaseUser currentUser;
@@ -36,6 +44,15 @@ class FirebaseMethods {
 //    return user;
     return result.user;
   }
+  Future<User> getUserDetails() async {
+    FirebaseUser currentUser = await getCurrentUser();
+
+    DocumentSnapshot documentSnapshot =
+    await _userCollection.document(currentUser.uid).get();
+
+    return User.fromMap(documentSnapshot.data);
+  }
+
 
   Future<bool> authenticateUser(FirebaseUser user) async {
     QuerySnapshot result = await firestore.collection(user_collection)
