@@ -13,7 +13,7 @@ class CallUtils{
   static final CallMethods callMethods = CallMethods();
 
   static dial({User from , User to , context}) async{
-    Call call = Call(
+    Call call = Call(  
       callerId : from.uid,
       callerName: from.name,
       callerPic: from.profilePhoto,

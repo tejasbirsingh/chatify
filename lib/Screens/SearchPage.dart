@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:video_chatting_app/Screens/ChatPage.dart';
+import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/ChatPage.dart';
 import 'package:video_chatting_app/models/user.dart';
-import 'package:video_chatting_app/resources/firebase_repository.dart';
+import 'package:video_chatting_app/resources/auth_methods.dart';
 import 'package:video_chatting_app/widgets/custom_tile.dart';
 
 class SearchPage extends StatefulWidget {
@@ -12,9 +12,9 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  FirebaseRepository _repository = FirebaseRepository();
+  final AuthMethods _authMethods = AuthMethods();
   List<User> userList;
-  String query ="";
+  String query = "";
   TextEditingController searchController = TextEditingController();
 
   @override
@@ -22,70 +22,69 @@ class _SearchPageState extends State<SearchPage> {
     // TODO: implement initState
     super.initState();
 
-    _repository.getCurrentUser().then((FirebaseUser user){
-      _repository.fetchAllUsers(user).then((List<User> list){
-       setState(() {
-         userList=list;
-       });
+    _authMethods.getCurrentUser().then((FirebaseUser user) {
+      _authMethods.fetchAllUsers(user).then((List<User> list) {
+        setState(() {
+          userList = list;
+        });
       });
-
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios,
-          color: Colors.white,),
-          onPressed: ()=> Navigator.pop(context),
-        ),
-        elevation: 0,
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight + 20),
-          child: Padding(
-            padding: EdgeInsets.only(left: 20),
-          child: TextField(
-            controller: searchController,
-            onChanged: (val){
-              setState(() {
-                query= val;
-              });
-
-            },
-            decoration: InputDecoration(
-              suffixIcon: IconButton(
-                icon: Icon(Icons.close,
-                color: Colors.white,),
-                onPressed: (){
-                  searchController.clear();
+    return SafeArea(
+      child: Scaffold(
+//      backgroundColor: Theme.of(context).backgroundColor,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
+          elevation: 0,
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(kToolbarHeight + 20),
+            child: Padding(
+              padding: EdgeInsets.only(left: 20),
+              child: TextField(
+                controller: searchController,
+                onChanged: (val) {
+                  setState(() {
+                    query = val;
+                  });
                 },
+                decoration: InputDecoration(
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        searchController.clear();
+                      },
+                    ),
+                    border: InputBorder.none,
+                    hintText: 'Search',
+                    hintStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15.0,
+                        color: Colors.white)),
               ),
-              border: InputBorder.none,
-              hintText: 'Search',
-              hintStyle: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15.0,
-                color: Colors.white
-              )
             ),
           ),
-          ),
-
-        ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade900, Colors.blue.shade500]
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [Colors.redAccent, Colors.red]),
             ),
           ),
         ),
-
-      ),
-      body:  Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.0),
-        child: buildSuggestions(query),
+        body: Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: buildSuggestions(query),
+        ),
       ),
     );
   }
@@ -93,57 +92,80 @@ class _SearchPageState extends State<SearchPage> {
   buildSuggestions(String query) {
     final List<User> suggestionsList = query.isEmpty
         ? []
-        : userList.where((User user){
-          String _getUsername = user.username.toLowerCase();
-          String _query = query.toLowerCase();
-          String _getName = user.name.toLowerCase();
-          bool matchedUsername = _getUsername.contains(_query);
-          bool matchedName = _getName.contains(_query);
+        : userList.where((User user) {
+            String _getUsername = user.username.toLowerCase();
+            String _query = query.toLowerCase();
+            String _getName = user.name.toLowerCase();
+            bool matchedUsername = _getUsername.contains(_query);
+            bool matchedName = _getName.contains(_query);
 
-          return (matchedUsername || matchedName);
-    }).toList();
+            return (matchedUsername || matchedName);
+          }).toList();
 //        userList.where((User user) => (user.username.toLowerCase().contains(query.toLowerCase()) ||
 //            (user.name.toLowerCase().contains(query.toLowerCase())))
 //
 
-    return ListView.builder(itemCount: suggestionsList.length,
-      itemBuilder: ((context, index){
+    return ListView.builder(
+      itemCount: suggestionsList.length,
+      itemBuilder: ((context, index) {
         User searchedUser = User(
-          uid: suggestionsList[index].uid,
-          profilePhoto:suggestionsList[index].profilePhoto,
-          name  : suggestionsList[index].name,
-          username:  suggestionsList[index].username
-
-        );
+            uid: suggestionsList[index].uid,
+            profilePhoto: suggestionsList[index].profilePhoto,
+            name: suggestionsList[index].name,
+            username: suggestionsList[index].username,
+            state: suggestionsList[index].state);
+        var v = searchedUser.state == null ? 3 : searchedUser.state;
         return CustomTile(
           mini: false,
-          onTap: (){
-            Navigator.push(context,
-            MaterialPageRoute(
-              builder: (context) => ChatPage(
-                receiver: searchedUser,
-              )
-            ));
+          live: statusColor(v),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ChatPage(
+                          receiver: searchedUser,
+                        )));
           },
           leading: CircleAvatar(
             backgroundImage: NetworkImage(searchedUser.profilePhoto),
             backgroundColor: Colors.grey,
           ),
           title: Text(
-            searchedUser.username,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white
-            ),
-          ),
-          subtitle: Text(
             searchedUser.name,
             style: TextStyle(
-              color: Colors.white
-            ),
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.white),
+          ),
+          subtitle: Text(
+            searchedUser.username,
+            style: TextStyle(color: Colors.white),
           ),
         );
       }),
     );
+  }
+
+  Color statusColor(state) {
+    Color c;
+    switch (state) {
+      case 1:
+        {
+          c = Colors.green;
+        }
+        break;
+
+      case 2:
+        {
+          c = Colors.orange;
+        }
+        break;
+      case 3:
+        {
+          c = Colors.red;
+        }
+        break;
+    }
+    return c;
   }
 }

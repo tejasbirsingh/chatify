@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:video_chatting_app/Screens/Home.dart';
+import 'package:video_chatting_app/resources/auth_methods.dart';
 import 'package:video_chatting_app/resources/firebase_repository.dart';
 
 class LoginPage extends StatefulWidget {
@@ -9,8 +10,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  FirebaseRepository _repository = FirebaseRepository();
+
   bool isLogin=false;
+  final AuthMethods _authMethods = AuthMethods();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       isLogin = true;
     });
-    _repository.signIn().then((FirebaseUser user) {
+    _authMethods.signIn().then((FirebaseUser user) {
       if (user != null){
         authenticateUser(user);
       }
@@ -56,12 +58,12 @@ class _LoginPageState extends State<LoginPage> {
 
   void authenticateUser(FirebaseUser user){
 
-      _repository.authenticateUser(user).then((isNewUser) {
+      _authMethods.authenticateUser(user).then((isNewUser) {
         setState(() {
           isLogin = false;
         });
         if(isNewUser){
-          _repository.addDataToDb(user).then((value){
+          _authMethods.addDataToDb(user).then((value){
             Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context){
               return HomePage();

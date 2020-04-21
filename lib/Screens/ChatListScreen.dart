@@ -1,39 +1,27 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'file:///E:/IdeaProjects/video_chatting_app/lib/utils/utilities.dart';
-import 'package:video_chatting_app/resources/firebase_repository.dart';
+import 'package:provider/provider.dart';
+import 'package:video_chatting_app/Screens/settingsPage.dart';
+import 'package:video_chatting_app/models/contact.dart';
+import 'package:video_chatting_app/provider/user_provider.dart';
+import 'package:video_chatting_app/resources/chat_methods.dart';
 import 'package:video_chatting_app/widgets/appBar.dart';
-import 'package:video_chatting_app/widgets/custom_tile.dart';
+import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/widgets/chat_users.dart';
+import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/widgets/new_chat_button.dart';
+import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/widgets/quietBox.dart';
+import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/widgets/user_circle.dart';
 
-class ChatListScreen extends StatefulWidget {
-  @override
-  _ChatListScreenState createState() => _ChatListScreenState();
-}
-final FirebaseRepository _repository = FirebaseRepository();
-
-class _ChatListScreenState extends State<ChatListScreen> {
-  String currentUserId;
-  String initials;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _repository.getCurrentUser().then((user){
-      setState(() {
-        currentUserId = user.uid;
-        initials = Utils.getInitials(user.displayName);
-      });
-    });
-  }
-
-  CustomAppBar customAppBar(BuildContext context){
+class ChatListScreen extends StatelessWidget {
+  CustomAppBar customAppBar(BuildContext context) {
     return CustomAppBar(
       leading: IconButton(
-        icon: Icon(Icons.notifications,
-        color: Colors.white,),
+        icon: Icon(
+          Icons.notifications,
+        ),
         onPressed: () {},
       ),
-      title: UserCircle(initials),
+      title: UserCircle(),
       centerTitle: true,
       actions: <Widget>[
         IconButton(
@@ -43,157 +31,77 @@ class _ChatListScreenState extends State<ChatListScreen> {
           },
         ),
         IconButton(
-          icon: Icon(Icons.menu),
+          icon: Icon(Icons.settings),
+          onPressed: () => Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => settingsPage())),
         )
       ],
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
       appBar: customAppBar(context),
       floatingActionButton: NewChatButton(),
-      body: ChatListContainer(currentUserId),
-    );
-  }
-}
-class ChatListContainer extends StatefulWidget {
-  final String currentUserId;
-
-   ChatListContainer(this.currentUserId);
-
-  @override
-  _ChatListContainerState createState() => _ChatListContainerState();
-}
-
-class _ChatListContainerState extends State<ChatListContainer> {
-  @override
-  Widget build(BuildContext context) {
-return ListView.builder(padding: EdgeInsets.all(10),
-itemCount: 2,
-    itemBuilder: (context , index){
-
-  return CustomTile(
-    mini: false,
-    onTap: () {},
-    title: Text(
-      'TBS',
-      style: TextStyle(
-        color: Colors.white , fontFamily: "Arial",fontSize: 19.0
-      ),
-    ),
-    subtitle: Text("Hello",
-    style: TextStyle(
-      color: Colors.grey,
-      fontSize: 14
-    ),),
-    leading: Container(
-      constraints: BoxConstraints(maxHeight: 60.0 , maxWidth: 60.0),
-      child: Stack(
-        children: <Widget>[
-          CircleAvatar(
-            maxRadius: 30.0,
-            backgroundColor: Colors.grey,
-          //  backgroundImage: NetworkImage(),
-          ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Container(
-              height: 30.0,
-              width: 30.0,
-              decoration: BoxDecoration(
-                shape:  BoxShape.circle,
-                color: Colors.blueAccent,
-                border: Border.all(
-                  color: Colors.black,
-                  width: 2
-                )
-              ),
-            ),
-          )
-        ],
-      ),
-    ),
-  );
-
-
-
-
-    });  }
-}
-
-
-
-
-class UserCircle extends StatelessWidget {
-  final String text;
-  UserCircle(this.text);
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 40.0,
-      width: 40.0,
-      decoration: BoxDecoration(
-        borderRadius:  BorderRadius.circular(60.0),
-        color: Colors.white
-      ),
-      child: Stack(
-        children: <Widget>[
-          Align(
-            alignment: Alignment.center,
-            child: Text(
-              text,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
-                fontSize: 13,
-              ),
-
-
-            ),
-          ),
-
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Container(
-              height: 12,
-              width: 12,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border : Border.all(
-                  color:Colors.black,
-                  width: 2
-                ),
-                color: Colors.green
-              ),
-            ),
-          )
-        ],
-      ),
+      body: ChatListContainer(),
     );
   }
 }
 
-class NewChatButton extends StatelessWidget{
-
+class ChatListContainer extends StatelessWidget {
+  final ChatMethods _chatMethods = ChatMethods();
   @override
   Widget build(BuildContext context) {
+    final UserProvider userProvider = Provider.of<UserProvider>(context);
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.purple,Colors.purple.shade900],
+      child: StreamBuilder<QuerySnapshot>(
+        stream: _chatMethods.fetchContacts(
+          userId: userProvider.getUser.uid
         ),
-        borderRadius: BorderRadius.circular(50.0),
+        builder: (context, snapshot){
+          if(snapshot.hasData){
+            var docList = snapshot.data.documents;
+            if (docList.isEmpty){
+              return QuietBox();
+            }
+            return ListView.builder(
+              physics: BouncingScrollPhysics(),
+              itemCount: docList.length,
+              itemBuilder: ((context, index) {
+             Contact contact = Contact.fromMap(docList[index].data);
+             return ChatsView(contact);
+              }),
+            );
+          }
+          return Center(child: CircularProgressIndicator(),);
 
-      ),
-      child: Icon(
-        Icons.edit,
-        color: Colors.white,
-        size: 25.0,
-      ),
-      padding: EdgeInsets.all(30.0),
+        },
+      )
     );
+  }
+
+  Color statusColor(state) {
+    Color c;
+    switch (state) {
+      case 1:
+        {
+          c = Colors.green;
+        }
+        break;
+
+      case 2:
+        {
+          c = Colors.orange;
+        }
+        break;
+      case 3:
+        {
+          c = Colors.red;
+        }
+        break;
+    }
+    return c;
   }
 }

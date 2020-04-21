@@ -3,104 +3,161 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:video_chatting_app/Screens/call_pickup/pickup_layout.dart';
+import 'package:video_chatting_app/enum/user_state.dart';
 import 'package:video_chatting_app/provider/user_provider.dart';
+import 'package:video_chatting_app/resources/auth_methods.dart';
 
 import 'ChatListScreen.dart';
-
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-
+class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
   PageController pageController;
   int _page = 0;
+
   var _label = 20.0;
 
-  UserProvider userProvider ;
-
+  UserProvider userProvider;
+final AuthMethods _authMethods = AuthMethods();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+   WidgetsBinding.instance.addObserver(this);
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      userProvider = Provider.of<UserProvider>(context, listen:false);
+      userProvider = Provider.of<UserProvider>(context, listen: false);
       userProvider.refreshUser();
+      _authMethods.setUserState(userId: userProvider.getUser.uid, userState: UserState.Online);
     });
     pageController = PageController();
   }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+   String currentUserId = (userProvider !=null && userProvider.getUser !=null)
+   ? userProvider.getUser.uid : "";
+    super.didChangeAppLifecycleState(state);
+   switch (state) {
+     case AppLifecycleState.resumed:
+       currentUserId != null
+           ? _authMethods.setUserState(
+           userId: currentUserId, userState: UserState.Online)
+           : print("resume state");
+       break;
+     case AppLifecycleState.inactive:
+       currentUserId != null
+           ? _authMethods.setUserState(
+           userId: currentUserId, userState: UserState.Offline)
+           : print("inactive state");
+       break;
+     case AppLifecycleState.paused:
+       currentUserId != null
+           ? _authMethods.setUserState(
+           userId: currentUserId, userState: UserState.Waiting)
+           : print("paused state");
+       break;
+     case AppLifecycleState.detached:
+       currentUserId != null
+           ? _authMethods.setUserState(
+           userId: currentUserId, userState: UserState.Offline)
+           : print("detached state");
+       break;
+   }
+  }
+  @override
+  void dispose() {
 
-  void onPageChanged(int page){
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+  }
+
+  void onPageChanged(int page) {
     setState(() {
       _page = page;
     });
   }
-  void navigationTapped(int page){
+
+  void navigationTapped(int page) {
     pageController.jumpToPage(page);
   }
-
 
   @override
   Widget build(BuildContext context) {
     return PickupLayout(
-
-      scaffold: Scaffold(
-       body: PageView(
-         children: <Widget>[
-         Container(child: ChatListScreen()),
-           Center(child: Text('Call Logs'),),
-           Center(child: Text('Contact Screen'),)
-         ],
-         controller: pageController,
-         onPageChanged: onPageChanged,
+      scaffold: SafeArea(
+        child: Scaffold(
+          body: PageView(
+            children: <Widget>[
+              Container(child: ChatListScreen()),
+              Center(
+                child: Text('Call Logs'),
+              ),
+              Center(
+                child: Text('Contact Screen'),
+              )
+            ],
+            controller: pageController,
+            onPageChanged: onPageChanged,
 //       physics: NeverScrollableScrollPhysics(),
-       ),
-        bottomNavigationBar: Container(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 30.0),
-            child: CupertinoTabBar(
-              backgroundColor: Colors.grey,
-              items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.chat,
-                  color: (_page==0) ? Colors.lightBlueAccent : Colors.white,),
-                  title: Text('Chat',
-                  style: TextStyle(
-                    fontSize: _label,
-                    color: (_page ==0) ?
-                        Colors.blueAccent :
-                        Colors.white
-                  ),)
-
-                ),
-                BottomNavigationBarItem(
-                  title: Text('Contacts',
-                    style: TextStyle(
-                        fontSize: _label,
-                        color: (_page ==0) ?
-                        Colors.blueAccent :
-                        Colors.white
-                    ),),
-                    icon: Icon(Icons.chat,
-                      color: (_page==1) ? Colors.lightBlueAccent : Colors.white,)
-                ),
-                BottomNavigationBarItem(
-                  title: Text('call',
-                    style: TextStyle(
-                        fontSize: _label,
-                        color: (_page ==0) ?
-                        Colors.blueAccent :
-                        Colors.white
-                    ),),
-                    icon: Icon(Icons.chat,
-                      color: (_page==2) ? Colors.lightBlueAccent : Colors.white,)
-                )
-              ],
-              onTap: navigationTapped,
-              currentIndex: _page,
+          ),
+          bottomNavigationBar: Container(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 0.0),
+              child: CupertinoTabBar(
+                backgroundColor: Theme.of(context).backgroundColor,
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                      icon: Icon(
+                        Icons.chat,
+                        color: (_page == 0)
+                            ? Colors.red
+                            : Theme.of(context).textSelectionColor,
+                      ),
+                      title: Text(
+                        'Chat',
+                        style: TextStyle(
+                            fontSize: _label,
+                            color: (_page == 0)
+                                ? Colors.red
+                                : Theme.of(context).textSelectionColor),
+                      )),
+                  BottomNavigationBarItem(
+                      title: Text(
+                        'Contacts',
+                        style: TextStyle(
+                            fontSize: _label,
+                            color: (_page == 1)
+                                ? Colors.red
+                                : Theme.of(context).textSelectionColor),
+                      ),
+                      icon: Icon(
+                        Icons.chat,
+                        color: (_page == 1)
+                            ? Colors.red
+                            : Theme.of(context).textSelectionColor,
+                      )),
+                  BottomNavigationBarItem(
+                      title: Text(
+                        'call',
+                        style: TextStyle(
+                            fontSize: _label,
+                            color: (_page == 2)
+                                ? Colors.red
+                                : Theme.of(context).textSelectionColor),
+                      ),
+                      icon: Icon(
+                        Icons.chat,
+                        color: (_page == 2)
+                            ? Colors.red
+                            : Theme.of(context).textSelectionColor,
+                      ))
+                ],
+                onTap: navigationTapped,
+                currentIndex: _page,
+              ),
             ),
           ),
         ),
