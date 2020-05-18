@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/ChatPage.dart';
 import 'package:video_chatting_app/models/contact.dart';
 import 'package:video_chatting_app/models/user.dart';
 import 'package:video_chatting_app/provider/user_provider.dart';
@@ -8,6 +7,8 @@ import 'package:video_chatting_app/resources/auth_methods.dart';
 import 'package:video_chatting_app/resources/chat_methods.dart';
 import 'package:video_chatting_app/widgets/cached_image.dart';
 import 'package:video_chatting_app/widgets/custom_tile.dart';
+
+import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/ChatPage.dart';
 import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/widgets/lastMessageContainer.dart';
 import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/widgets/state_indicator.dart';
 
@@ -56,11 +57,8 @@ class ViewLayout extends StatelessWidget {
               builder: (context) => ChatPage(
                     receiver: contact,
                   ))),
-      title: Text(
-        contact?.name ?? "..",
-        style:
-            TextStyle(color: Colors.white, fontFamily: "Arial", fontSize: 19.0),
-      ),
+      title: Text(contact?.name ?? "..",
+          style: Theme.of(context).textTheme.headline6),
       subtitle: LastMessageContainer(
           stream: _chatMethods.fetchLastMessageBetween(
               senderId: userProvider.getUser.uid, receiverId: contact.uid)),
@@ -84,8 +82,4 @@ class ViewLayout extends StatelessWidget {
       ),
     ));
   }
-}.23
-    69+*/
-9+6
-3..
-    36+9*-*
+}

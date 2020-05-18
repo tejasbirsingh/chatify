@@ -15,7 +15,7 @@ class AuthMethods {
   static final Firestore firestore = Firestore.instance;
 
   static final CollectionReference _userCollection =
-      _firestore.collection(user_collection);
+  _firestore.collection(user_collection);
 
   Future<FirebaseUser> getCurrentUser() async {
     FirebaseUser currentUser;
@@ -26,7 +26,7 @@ class AuthMethods {
   Future<User> getUserDetailsById(id) async {
     try {
       DocumentSnapshot documentSnapshot =
-          await _userCollection.document(id).get();
+      await _userCollection.document(id).get();
       return User.fromMap(documentSnapshot.data);
     } catch (e) {
       print(e);
@@ -38,23 +38,28 @@ class AuthMethods {
     FirebaseUser currentUser = await getCurrentUser();
 
     DocumentSnapshot documentSnapshot =
-        await _userCollection.document(currentUser.uid).get();
+    await _userCollection.document(currentUser.uid).get();
 
     return User.fromMap(documentSnapshot.data);
   }
 
   Future<FirebaseUser> signIn() async {
-    GoogleSignInAccount _signInAccount = await _googleSignIn.signIn();
-    GoogleSignInAuthentication _signInAuthentication =
-        await _signInAccount.authentication;
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-        idToken: _signInAuthentication.idToken,
-        accessToken: _signInAuthentication.accessToken);
+    try {
+      GoogleSignInAccount _signInAccount = await _googleSignIn.signIn();
+      GoogleSignInAuthentication _signInAuthentication =
+      await _signInAccount.authentication;
 
-    AuthResult result = await _auth.signInWithCredential(credential);
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+          idToken: _signInAuthentication.idToken,
+          accessToken: _signInAuthentication.accessToken);
 
-    return result.user;
-  }
+      AuthResult result = await _auth.signInWithCredential(credential);
+
+      return result.user;
+    } catch(e){
+      print(e);
+      return null;
+    }}
 
   Future<bool> authenticateUser(FirebaseUser user) async {
     QuerySnapshot result = await firestore
@@ -86,7 +91,7 @@ class AuthMethods {
     List<User> userList = List<User>();
 
     QuerySnapshot querySnapshot =
-        await firestore.collection(user_collection).getDocuments();
+    await firestore.collection(user_collection).getDocuments();
     for (var i = 0; i < querySnapshot.documents.length; i++) {
       if (querySnapshot.documents[i].documentID != currentUser.uid) {
         userList.add(User.fromMap(querySnapshot.documents[i].data));
@@ -95,9 +100,15 @@ class AuthMethods {
     return userList;
   }
 
-  Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    return await _auth.signOut();
+  Future signOut() async {
+    try {
+      await _googleSignIn.signOut();
+      await _auth.signOut();
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 
   void setUserState({@required String userId, @required UserState userState}) {

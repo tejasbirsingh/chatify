@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:video_chatting_app/resources/firebase_repository.dart';
 
 class CustomTile extends StatelessWidget {
   final Widget leading;
@@ -11,90 +10,103 @@ class CustomTile extends StatelessWidget {
   final bool mini;
   final GestureTapCallback onTap;
   final GestureLongPressCallback onLongPress;
-  final Color live;
+  final bool isRequest;
+  final GestureTapCallback requestButtonPress;
+  final GestureTapCallback requestLongPress;
 
-  const CustomTile(
-      {Key key,
-      @required this.leading,
-      @required this.title,
-      this.icon,
-      @required this.subtitle,
-      this.trailing,
-        this.live,
-      this.margin = const EdgeInsets.all(0),
-      this.mini = true,
-      this.onTap,
-      this.onLongPress})
-      : super(key: key);
+  const CustomTile({
+    Key key,
+    @required this.leading,
+    @required this.title,
+    this.icon,
+    @required this.subtitle,
+    this.trailing,
+
+    this.margin = const EdgeInsets.all(0),
+    this.mini = true,
+    this.onTap,
+    this.onLongPress,
+    this.isRequest,
+    this.requestButtonPress,
+    this.requestLongPress,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: mini ? 30 : 0),
+      margin: margin,
+      child: Row(
+        children: <Widget>[
+          GestureDetector(
+            onTap: () {},
+            child: Stack(
+              children: <Widget>[
+                leading,
 
-    return GestureDetector(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Container(
-
-          padding: EdgeInsets.symmetric(horizontal: mini ? 30 : 0),
-          margin: margin,
-          child: Row(
-
-            children: <Widget>[
-              Stack(
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 10.0,
+          ),
+          GestureDetector(
+            onTap: onTap,
+            onLongPress: onLongPress,
+            child: Container(
+              margin: EdgeInsets.symmetric(vertical: mini ? 3 : 20),
+              decoration: BoxDecoration(
+                  border: Border(
+                      bottom: BorderSide(
+                width: 1,
+                color: Colors.grey,
+              ))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-
-                  leading,
-                  Positioned(
-                    right: 0.0,
-                    bottom: 0.0,
-                    child: Container(
-                      height: 10.0,
-                      width: 10.0,
-
-                      decoration: BoxDecoration(
-                        color:live,
-                        borderRadius: BorderRadius.circular(20.0),
-
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(width: 10.0,),
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.symmetric(vertical: mini ? 3 : 20),
-                  decoration: BoxDecoration(
-                      border: Border(
-                          bottom: BorderSide(
-                    width: 1,
-                    color: Colors.grey,
-                  ))),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                         title ,
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Row(
-                            children: <Widget>[
-                              icon ?? Container(),
-                              subtitle,
-                            ],
-                          )
-                        ],
+                      title,
+                      SizedBox(
+                        height: 5,
                       ),
-                      trailing ?? Container(),
+                      Row(
+                        children: <Widget>[
+                          icon ?? Container(),
+                          subtitle,
+                        ],
+                      )
                     ],
                   ),
-                ),
+                  trailing ?? Container(),
+                  SizedBox(
+                    width: 20.0,
+                  ),
+                  isRequest == true
+                      ? GestureDetector(
+                          onTap: requestButtonPress,
+                          onLongPress: requestLongPress,
+                          child: Container(
+                            height: 30.0,
+                            width: 30.0,
+                            decoration: BoxDecoration(
+                                color: Theme.of(context).iconTheme.color,
+                                shape: BoxShape.circle),
+                            child: Center(
+                                child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                            )),
+                          ),
+                        )
+                      : Container()
+                ],
               ),
-            ],
+            ),
           ),
-        ));
+        ],
+      ),
+    );
   }
 }

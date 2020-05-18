@@ -1,9 +1,8 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/widgets.dart';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:video_chatting_app/models/user.dart';
 import 'package:video_chatting_app/provider/image_upload_provider.dart';
 import 'package:video_chatting_app/resources/chat_methods.dart';
@@ -17,14 +16,14 @@ class StorageMethods {
   User user = User();
 
   Future<String> uploadImageToStorage(File imageFile) async {
-    // mention try catch later on
+
 
     try {
       _storageReference = FirebaseStorage.instance
           .ref()
           .child('${DateTime.now().millisecondsSinceEpoch}');
       StorageUploadTask storageUploadTask =
-      _storageReference.putFile(imageFile);
+          _storageReference.putFile(imageFile);
       var url = await (await storageUploadTask.onComplete).ref.getDownloadURL();
       // print(url);
       return url;

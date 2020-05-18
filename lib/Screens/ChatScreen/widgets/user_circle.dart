@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_chatting_app/Screens/ChatScreen/widgets/userDetailsContainer.dart';
 import 'package:video_chatting_app/provider/user_provider.dart';
 import 'package:video_chatting_app/utils/utilities.dart';
 
@@ -13,8 +14,7 @@ class UserCircle extends StatelessWidget {
       height: 40.0,
       width: 40.0,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(60.0),
-          color: Colors.white),
+          borderRadius: BorderRadius.circular(60.0), color: Colors.white),
       child: Stack(
         children: <Widget>[
           Align(
@@ -35,8 +35,7 @@ class UserCircle extends StatelessWidget {
               width: 12,
               decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                      color: Colors.black, width: 2),
+                  border: Border.all(color: Colors.black, width: 2),
                   color: Colors.green),
             ),
           )

@@ -4,5 +4,6 @@ const String Email = "email";
 const String Is_Image = "image";
 const String call_reference = "call";
 const String Contacts_reference = "contacts";
+const String friends_reference = "friends";
 
 const String TimeStampField = "timestamp";

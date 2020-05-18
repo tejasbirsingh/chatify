@@ -8,7 +8,7 @@ final darkTheme = ThemeData(
 
     ),
     iconTheme: IconThemeData(
-        color: Colors.red,
+        color: Colors.white54,
         size: 30.0
     ),
     textTheme: TextTheme(
@@ -21,8 +21,8 @@ final darkTheme = ThemeData(
     primarySwatch: Colors.red,
     primaryColor: Colors.black,
     brightness: Brightness.dark,
-    backgroundColor: Colors.black.withOpacity(0.1),
-    accentColor: Colors.red,
+    backgroundColor: Colors.black,
+    accentColor: Colors.red.shade800,
 
     dividerColor: Colors.black12,
 );
@@ -30,11 +30,11 @@ final darkTheme = ThemeData(
 final lightTheme = ThemeData(
     textSelectionColor: Colors.black,
     appBarTheme: AppBarTheme(
-        color: Colors.black.withOpacity(0.6),
+
 
     ),
     iconTheme: IconThemeData(
-        color: Colors.red,
+        color: Colors.white,
         size: 30.0
     ),
     textTheme: TextTheme(
@@ -48,7 +48,7 @@ final lightTheme = ThemeData(
     primaryColor: Colors.white,
     brightness: Brightness.light,
     backgroundColor: Colors.white,
-    accentColor: Colors.red,
+    accentColor: Colors.redAccent,
    
     dividerColor: Colors.white54,
 );

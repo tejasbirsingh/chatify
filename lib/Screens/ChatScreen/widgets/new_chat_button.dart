@@ -8,7 +8,7 @@ class NewChatButton extends StatelessWidget {
       width: 60.0,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.red, Colors.red.shade900],
+          colors: [Colors.redAccent, Colors.red.shade400],
         ),
         borderRadius: BorderRadius.circular(100.0),
       ),

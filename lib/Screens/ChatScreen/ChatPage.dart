@@ -6,14 +6,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:video_chatting_app/Screens/ChatScreen/user_profile.dart';
 import 'package:video_chatting_app/constants/string.dart';
 import 'package:video_chatting_app/enum/view_state.dart';
 import 'package:video_chatting_app/models/message.dart';
 import 'package:video_chatting_app/models/user.dart';
 import 'package:video_chatting_app/provider/image_upload_provider.dart';
+import 'package:video_chatting_app/provider/user_provider.dart';
 import 'package:video_chatting_app/resources/auth_methods.dart';
 import 'package:video_chatting_app/resources/chat_methods.dart';
-import 'package:video_chatting_app/resources/firebase_repository.dart';
 import 'package:video_chatting_app/resources/storage_methods.dart';
 import 'package:video_chatting_app/utils/call_utilities.dart';
 import 'package:video_chatting_app/utils/permissions.dart';
@@ -33,11 +34,10 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   ImageUploadProvider _imageUploadProvider;
-final AuthMethods _authMethods = AuthMethods();
-final ChatMethods _chatMethods = ChatMethods();
-final StorageMethods _storageMethods =StorageMethods();
-FocusNode textFieldFocus = FocusNode();
-
+  final AuthMethods _authMethods = AuthMethods();
+  final ChatMethods _chatMethods = ChatMethods();
+  final StorageMethods _storageMethods =StorageMethods();
+  FocusNode textFieldFocus = FocusNode();
   TextEditingController textEditingController = TextEditingController();
   ScrollController _listScrollController = ScrollController();
   bool emojiOn = false;
@@ -61,6 +61,7 @@ FocusNode textFieldFocus = FocusNode();
   @override
   Widget build(BuildContext context) {
     _imageUploadProvider = Provider.of<ImageUploadProvider>(context);
+
     return SafeArea(
       child: Scaffold(
         appBar: customAppBar(context),
@@ -118,12 +119,6 @@ FocusNode textFieldFocus = FocusNode();
           return Center(child: CircularProgressIndicator());
         }
 
-//        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-//          _listScrollController.animateTo(
-//          _listScrollController.position.minScrollExtent,
-//              duration: Duration(milliseconds: 200),
-//              curve: Curves.easeInOut);
-//        });
         return ListView.builder(
           controller: _listScrollController,
           reverse: true,
@@ -233,7 +228,9 @@ FocusNode textFieldFocus = FocusNode();
   }
 
   customAppBar(BuildContext context) {
+
     return CustomAppBar(
+
       leading: IconButton(
         icon: Icon(Icons.arrow_back_ios),
         onPressed: () => Navigator.pop(context),
@@ -242,7 +239,9 @@ FocusNode textFieldFocus = FocusNode();
       title: Text(
         widget.receiver.name,
       ),
+
       actions: <Widget>[
+
         IconButton(
           icon: Icon(
             Icons.video_call,
@@ -255,13 +254,14 @@ FocusNode textFieldFocus = FocusNode();
         ),
         IconButton(
           icon: Icon(Icons.call),
-          onPressed: () {},
+          onPressed: () {}
+
         )
       ],
     );
   }
 
-  pickImage(@required ImageSource source) async {
+  void pickImage({@required ImageSource source}) async {
     File selectedImage = await Utils.pickImage(source: source);
     _storageMethods.uploadImage(
         image: selectedImage,
@@ -314,7 +314,7 @@ FocusNode textFieldFocus = FocusNode();
                         title: 'Media',
                         subtitle: 'Photos and videos',
                         icon: Icons.image,
-                        onTap: () => pickImage(ImageSource.gallery),
+                        onTap: () => pickImage(source: ImageSource.gallery),
                       ),
                       ModalTile(
                         title: 'File',
@@ -418,7 +418,7 @@ FocusNode textFieldFocus = FocusNode();
           onTap
               ? Container()
               : GestureDetector(
-                  onTap: () => pickImage(ImageSource.camera),
+                  onTap: () => pickImage(source: ImageSource.camera),
                   child: Icon(Icons.camera_alt)),
           onTap
               ? Container(

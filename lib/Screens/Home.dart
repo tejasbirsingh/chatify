@@ -7,69 +7,76 @@ import 'package:video_chatting_app/enum/user_state.dart';
 import 'package:video_chatting_app/provider/user_provider.dart';
 import 'package:video_chatting_app/resources/auth_methods.dart';
 
-import 'ChatListScreen.dart';
+import 'file:///E:/IdeaProjects/video_chatting_app/lib/Screens/ContactsScreen/contactsPage.dart';
+
+import 'ChatScreen/widgets/ChatListScreen.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   PageController pageController;
   int _page = 0;
 
   var _label = 20.0;
 
   UserProvider userProvider;
-final AuthMethods _authMethods = AuthMethods();
+  final AuthMethods _authMethods = AuthMethods();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-   WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
 
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
       userProvider = Provider.of<UserProvider>(context, listen: false);
-      userProvider.refreshUser();
-      _authMethods.setUserState(userId: userProvider.getUser.uid, userState: UserState.Online);
+      await userProvider.refreshUser();
+      _authMethods.setUserState(
+          userId: userProvider.getUser.uid, userState: UserState.Online);
     });
     pageController = PageController();
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-   String currentUserId = (userProvider !=null && userProvider.getUser !=null)
-   ? userProvider.getUser.uid : "";
+    String currentUserId =
+        (userProvider != null && userProvider.getUser != null)
+            ? userProvider.getUser.uid
+            : "";
     super.didChangeAppLifecycleState(state);
-   switch (state) {
-     case AppLifecycleState.resumed:
-       currentUserId != null
-           ? _authMethods.setUserState(
-           userId: currentUserId, userState: UserState.Online)
-           : print("resume state");
-       break;
-     case AppLifecycleState.inactive:
-       currentUserId != null
-           ? _authMethods.setUserState(
-           userId: currentUserId, userState: UserState.Offline)
-           : print("inactive state");
-       break;
-     case AppLifecycleState.paused:
-       currentUserId != null
-           ? _authMethods.setUserState(
-           userId: currentUserId, userState: UserState.Waiting)
-           : print("paused state");
-       break;
-     case AppLifecycleState.detached:
-       currentUserId != null
-           ? _authMethods.setUserState(
-           userId: currentUserId, userState: UserState.Offline)
-           : print("detached state");
-       break;
-   }
+    switch (state) {
+      case AppLifecycleState.resumed:
+        currentUserId != null
+            ? _authMethods.setUserState(
+                userId: currentUserId, userState: UserState.Online)
+            : print("resume state");
+        break;
+      case AppLifecycleState.inactive:
+        currentUserId != null
+            ? _authMethods.setUserState(
+                userId: currentUserId, userState: UserState.Offline)
+            : print("inactive state");
+        break;
+      case AppLifecycleState.paused:
+        currentUserId != null
+            ? _authMethods.setUserState(
+                userId: currentUserId, userState: UserState.Waiting)
+            : print("paused state");
+        break;
+      case AppLifecycleState.detached:
+        currentUserId != null
+            ? _authMethods.setUserState(
+                userId: currentUserId, userState: UserState.Offline)
+            : print("detached state");
+        break;
+    }
   }
+
   @override
   void dispose() {
-
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
   }
@@ -92,8 +99,8 @@ final AuthMethods _authMethods = AuthMethods();
           body: PageView(
             children: <Widget>[
               Container(child: ChatListScreen()),
-              Center(
-                child: Text('Call Logs'),
+              Container(
+                child: contactsPage(),
               ),
               Center(
                 child: Text('Contact Screen'),
@@ -113,7 +120,7 @@ final AuthMethods _authMethods = AuthMethods();
                       icon: Icon(
                         Icons.chat,
                         color: (_page == 0)
-                            ? Colors.red
+                            ? Theme.of(context).accentColor
                             : Theme.of(context).textSelectionColor,
                       ),
                       title: Text(
@@ -121,7 +128,7 @@ final AuthMethods _authMethods = AuthMethods();
                         style: TextStyle(
                             fontSize: _label,
                             color: (_page == 0)
-                                ? Colors.red
+                                ? Theme.of(context).accentColor
                                 : Theme.of(context).textSelectionColor),
                       )),
                   BottomNavigationBarItem(
@@ -130,28 +137,29 @@ final AuthMethods _authMethods = AuthMethods();
                         style: TextStyle(
                             fontSize: _label,
                             color: (_page == 1)
-                                ? Colors.red
+                                ? Theme.of(context).accentColor
                                 : Theme.of(context).textSelectionColor),
                       ),
                       icon: Icon(
-                        Icons.chat,
+                        Icons.contacts,
                         color: (_page == 1)
-                            ? Colors.red
+                            ?Theme.of(context).accentColor
                             : Theme.of(context).textSelectionColor,
                       )),
                   BottomNavigationBarItem(
+
                       title: Text(
                         'call',
                         style: TextStyle(
                             fontSize: _label,
                             color: (_page == 2)
-                                ? Colors.red
+                                ? Theme.of(context).accentColor
                                 : Theme.of(context).textSelectionColor),
                       ),
                       icon: Icon(
-                        Icons.chat,
+                        Icons.call,
                         color: (_page == 2)
-                            ? Colors.red
+                            ? Theme.of(context).accentColor
                             : Theme.of(context).textSelectionColor,
                       ))
                 ],

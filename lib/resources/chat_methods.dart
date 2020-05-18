@@ -116,6 +116,11 @@ class ChatMethods {
       .document(userId)
       .collection(Contacts_reference)
       .snapshots();
+  
+Stream<QuerySnapshot> fetchFriends({String userId}) =>_userCollection
+    .document(userId)
+    .collection(friends_reference)
+    .snapshots();
 
   Stream<QuerySnapshot> fetchLastMessageBetween({
     @required String senderId,
@@ -126,4 +131,47 @@ class ChatMethods {
           .collection(receiverId)
           .orderBy("timestamp")
           .snapshots();
+
+  Future<void> sendRequest(
+      {User currentUser, User requestReceiver}) async {
+    var followingMap = Map<String, String>();
+    followingMap['uid'] = requestReceiver.uid;
+    followingMap['name'] = requestReceiver.name;
+    await _firestore
+        .collection(user_collection)
+        .document(currentUser.uid)
+        .collection("friends")
+        .document(requestReceiver.uid)
+        .setData(followingMap);
+
+    var followersMap = Map<String, String>();
+    followersMap['uid'] = currentUser.uid;
+    followersMap['name'] = currentUser.name;
+
+    return _firestore
+        .collection(user_collection)
+        .document(requestReceiver.uid)
+        .collection(friends_reference)
+        .document(currentUser.uid)
+        .setData(followersMap);
+  }
+  Future<void> removeFriend(
+      {User user, User friend}) async {
+    await _firestore
+        .collection(user_collection)
+        .document(user.uid)
+        .collection(friends_reference)
+        .document(friend.uid)
+        .delete();
+
+    return _firestore
+        .collection(user_collection)
+        .document(friend.uid)
+        .collection(friends_reference)
+        .document(user.uid)
+        .delete();
+  }
+
+
+
 }

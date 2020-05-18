@@ -1,10 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/ChatPage.dart';
+import 'package:provider/provider.dart';
 import 'package:video_chatting_app/models/user.dart';
+import 'package:video_chatting_app/provider/user_provider.dart';
 import 'package:video_chatting_app/resources/auth_methods.dart';
+import 'package:video_chatting_app/resources/chat_methods.dart';
 import 'package:video_chatting_app/widgets/custom_tile.dart';
+
+import 'file:///D:/video_chatting_app/lib/Screens/ChatScreen/ChatPage.dart';
+
+import 'ChatScreen/widgets/state_indicator.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -13,6 +19,8 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final AuthMethods _authMethods = AuthMethods();
+  final ChatMethods _chatMethods = ChatMethods();
+
   List<User> userList;
   String query = "";
   TextEditingController searchController = TextEditingController();
@@ -33,6 +41,7 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final UserProvider userProvider = Provider.of<UserProvider>(context);
     return SafeArea(
       child: Scaffold(
 //      backgroundColor: Theme.of(context).backgroundColor,
@@ -77,19 +86,19 @@ class _SearchPageState extends State<SearchPage> {
           ),
           flexibleSpace: Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [Colors.redAccent, Colors.red]),
+              color: Theme.of(context).accentColor
             ),
           ),
         ),
         body: Container(
           padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: buildSuggestions(query),
+          child: buildSuggestions(query, userProvider.getUser),
         ),
       ),
     );
   }
 
-  buildSuggestions(String query) {
+  buildSuggestions(String query, uid) {
     final List<User> suggestionsList = query.isEmpty
         ? []
         : userList.where((User user) {
@@ -115,9 +124,19 @@ class _SearchPageState extends State<SearchPage> {
             username: suggestionsList[index].username,
             state: suggestionsList[index].state);
         var v = searchedUser.state == null ? 3 : searchedUser.state;
+
         return CustomTile(
           mini: false,
-          live: statusColor(v),
+          isRequest: true,
+          requestButtonPress: () {
+            _chatMethods.sendRequest(
+                currentUser: uid,
+                requestReceiver: searchedUser != null ? searchedUser : "");
+          },
+          onLongPress: () {
+            _chatMethods.removeFriend(
+                user: uid, friend: searchedUser != null ? searchedUser : "");
+          },
           onTap: () {
             Navigator.push(
                 context,
@@ -126,9 +145,26 @@ class _SearchPageState extends State<SearchPage> {
                           receiver: searchedUser,
                         )));
           },
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(searchedUser.profilePhoto),
-            backgroundColor: Colors.grey,
+          leading: Container(
+            constraints: BoxConstraints(maxHeight: 60.0, maxWidth: 60.0),
+            child: Stack(
+              children: <Widget>[
+                Container(
+                  height: 80,
+                  width: 80.0,
+                  child: CircleAvatar(
+                    backgroundImage: NetworkImage(searchedUser.profilePhoto),
+                    backgroundColor: Colors.grey,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: OnlineDotIndicator(
+                    uid: searchedUser.uid,
+                  ),
+                )
+              ],
+            ),
           ),
           title: Text(
             searchedUser.name,
