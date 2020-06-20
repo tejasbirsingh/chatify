@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:video_chatting_app/Screens/call_pickup/pickup_layout.dart';
+import 'package:video_chatting_app/Screens/logs/widgets/log_screen.dart';
 import 'package:video_chatting_app/enum/user_state.dart';
 import 'package:video_chatting_app/provider/user_provider.dart';
 import 'package:video_chatting_app/resources/auth_methods.dart';
@@ -99,11 +100,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           body: PageView(
             children: <Widget>[
               Container(child: ChatListScreen()),
+
               Container(
                 child: contactsPage(),
               ),
               Center(
-                child: Text('Contact Screen'),
+                child: LogScreen(),
               )
             ],
             controller: pageController,
